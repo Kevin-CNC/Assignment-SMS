@@ -1,7 +1,7 @@
 from .StudentClass import Student
 
 class Undergraduate(Student):
-    def __init__(self, name, year, undergradCourse):
+    def __init__(self, name:str, year:int, undergradCourse:str):
         super().__init__(name, year)
         self.__course__ = undergradCourse
         self.__studentType__ = "Undergraduate"

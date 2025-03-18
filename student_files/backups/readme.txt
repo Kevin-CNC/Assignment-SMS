@@ -1,0 +1,1 @@
+This is the backups directory where I keep backups of the student files ( for safety reasons )

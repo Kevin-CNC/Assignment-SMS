@@ -1,7 +1,7 @@
 from .StudentClass import Student
 
 class Postgraduate(Student):
-    def __init__(self,name, year,alreadyFinishedCourse,previousUniversity,postGradCourse):
+    def __init__(self, name:str, year:int,alreadyFinishedCourse:str,previousUniversity:str,postGradCourse:str):
         super().__init__(name, year)
         self.__finishedCourse__ = alreadyFinishedCourse
         self.__previousUniversity__ = previousUniversity
