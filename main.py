@@ -10,9 +10,8 @@ def printMainMenu():
           * 1 - Add a new student
           * 2 - Update student's details
           * 3 - Delete a student
-          * 4 - Search (See More)
-          * 5 - See all students
-          * 6 - Exit
+          * 4 - See all students
+          * 5 - Exit
           """)
 
 def getNumeralInput(msg,outputmsg):
@@ -54,7 +53,16 @@ def addNewStudent():
             elif sam_Userinput == 1: # Adding undergraduate student
                 while True:
                     print("Adding undergraduate student details: ")
-                    studentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
+                    
+                    while True: # Student name choice
+                        global studentName
+                        studentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
+                        
+                        if studentName.find("-") == -1:
+                            break
+                        else:
+                            print("Invalid name, contains an illegal character.")
+                        
                     
                     while True: # Year validation loop
                         global studentYear
@@ -76,7 +84,7 @@ def addNewStudent():
                     while True: # Course loop
                         global courseId
                         
-                        courseIdInput = str(input("Enter course ID ('-' character is required): "))
+                        courseIdInput = str(input("Enter course ID: "))
                         if Courses["Undergraduate"].get(courseIdInput) == None:
                             print("Invalid ID, press 1 if you would like to have a list of all undergraduate courses, anything else to directly retry")
                             showUndergradCourseOption = getNumeralInput("","")
@@ -106,9 +114,17 @@ def addNewStudent():
             elif sam_Userinput == 2: # Adding postgraduate student
                 while True:
                     print("Adding postgraduate student details: ")
-                    studentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
+                    
+                    while True: # Student name choice
+                        global studentName
+                        studentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
                         
-                    print("What course have they completed?\nIf their course is also offered in this institution, enter its' ID from the already-existing courses database (Enter 1 if you wish to have a list of all undergraduate courses).\nElse, please enter 'Other' .")
+                        if studentName.find("-") == -1:
+                            break
+                        else:
+                            print("Invalid name, contains an illegal character.")
+                        
+                    print("What course have they completed?\nIf their course is also offered in this institution, enter its' ID from the already-existing courses database.\nElse, please enter 'Other' .\n(Enter 1 if you wish to have a list of all undergraduate courses, else anything else to not display them.)")
                     showUndergradCourseOption = getNumeralInput("","")
                     if showUndergradCourseOption == 1:
                         printAllUndergradCourses()
@@ -116,7 +132,7 @@ def addNewStudent():
                     while True: # Previous course loop
                         global completedCourse
                         
-                        courseIdInput = str(input("Enter course ID ('-' character is required): "))
+                        courseIdInput = str(input("Enter course ID: "))
                         if courseIdInput == "other" or courseIdInput == "Other" or courseIdInput == "OTHER":
                             completedCourse = "Other"
                             break
@@ -131,11 +147,18 @@ def addNewStudent():
                         
                         
                     # Previous university name
-                    print("Enter their previous university's name:\n")
-                    prevUniName = str(input(""))
+                    while True:
+                        global prevUniName
+                        print("Enter their previous university's name:")
+                        prevUniName = str(input(""))
+                        
+                        if prevUniName.find('-') == -1: # returns -1 upon failure of finding the character
+                            break
+                        else:
+                            print("Illegal character found (-); Avoid using this character.")
                         
                     
-                    print("What postgraduate course are they enrolled in?\n  Enter 1 if you'd like to be given a list of all postgraduate courses available (Anything else to skip).")
+                    print("What postgraduate course are they enrolled in?\nEnter 1 if you'd like to be given a list of all postgraduate courses available (Anything else to skip).")
                     showPostgradCourses = getNumeralInput("","")
                     if showPostgradCourses == 1:
                         printAllPostgradCourses()
@@ -143,7 +166,7 @@ def addNewStudent():
                     while True: # Current Course loop
                         global postgradCourseId
                         
-                        courseIdInput = str(input("Enter course ID ('-' character is required): "))
+                        courseIdInput = str(input("Enter course ID: "))
                         if Courses["Postgraduate"].get(courseIdInput) == None:
                             print("Invalid ID, press 1 if you would like to have a list of all postgraduate courses, anything else to directly retry")
                             showUndergradCourseOption = getNumeralInput("","")
@@ -151,25 +174,31 @@ def addNewStudent():
                                 printAllPostgradCourses()   
                         else:
                             postgradCourseId = courseIdInput
+                            print("a")
                             break
-                            
-                            
-                        print(f"Here are the finalised details:\nYour student is an: Postgraduate;\nYour student's full name is: {studentName};\nYour student's current year: {studentYear};\nYour student's course is: {Courses["Postgraduate"][postgradCourseId]};\nYour student completed the undergraduate course: {completedCourse};\nYour student completed their undergraduate course at the following institution: {prevUniName};\n\nEnter 1 to confirm this student's details, press 2 to retry the process, anything else to directly go back to main menu.")
+                        
                     
-                        userChoice = getNumeralInput("","")
-                        if userChoice == 1: # Confirmation; can add to database
-                            confirmedStudent = PostGrad(studentName,5,completedCourse,prevUniName,courseId)
-                            writeToFile("Postgraduate",confirmedStudent)
-                            
-                            print("Student added, going back to main menu...")
-                            printMainMenu()
-                            break
-                        elif userChoice == 2: # Retry; Skip this iteration
-                            continue
-                        else:
-                            break
+                    print(f"Here are the finalised details:\nYour student is an: Postgraduate;\nYour student's course is: {Courses["Postgraduate"][postgradCourseId]};\nYour student completed the undergraduate course: {completedCourse};\nYour student completed their undergraduate course at the following institution: {prevUniName};\n\nEnter 1 to confirm this student's details, press 2 to retry the process, anything else to directly go back to main menu.")
+                
+                    userChoice = getNumeralInput("","")
+                    if userChoice == 1: # Confirmation; can add to database
+                        confirmedStudent = PostGrad(studentName,5,completedCourse,prevUniName,courseId)
+                        writeToFile("Postgraduate",confirmedStudent)
+                        
+                        print("Student added, going back to main menu...")
+                        printMainMenu()
+                        break
+                    elif userChoice == 2: # Retry; Skip this iteration
+                        print("Retrying:")
+                        continue
+                    else:
+                        print("Exiting:")
+                        printMainMenu()
+                        break
+                    
+                    
     except Exception as e:
-        print()
+        print(e)
 
 
 ## MAIN PROGRAM HERE ##
@@ -183,9 +212,9 @@ while InProgram:
         case 1:
             addNewStudent()
             break
-        case 5:
+        case 4:
             print(fetchAllData())
-        case 6:
+        case 5:
             InProgram = False
             print("Exiting program...")
             break

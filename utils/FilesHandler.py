@@ -1,5 +1,8 @@
 from pathlib import Path
 from .StudentClass import Student
+from .PostgraduateClass import Postgraduate
+from .UndergradClass import Undergraduate
+import threading as T
 
 # Referencing the Student_System directory through this script's current position
 mainDirectory = Path(__file__).resolve().parent.parent
@@ -9,6 +12,19 @@ filePaths = {
     "Undergraduates":f"{mainDirectory}/student_files/UndergradData.txt",
     "Postgraduates":f"{mainDirectory}/student_files/PostgradData.txt"
 }
+
+def __getRawFromAll__():
+    dataList = list()
+    undergraduatePath = filePaths.get("Undergraduates")
+    postgraduatePath = filePaths.get("Postgraduates")
+    
+    # TODO
+        
+    
+    
+    
+    
+    
 
 def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user will only have a choice between the 2
     try:
@@ -36,3 +52,11 @@ def fetchAllData():
         return content
     except Exception as e:
         raise(e)
+    
+    
+def findStudentAlgorithm(searchMode:int): # user will be able to choose between 2 modes (Name & UniqueID)
+    # main idea behind algorithms:
+    # accumulate all in 1 list
+    # in both cases, split list into closest number of chunks possible and create different threads for each chunk
+    # TODO
+    print("mns")
