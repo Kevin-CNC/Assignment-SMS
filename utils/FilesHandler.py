@@ -1,4 +1,5 @@
 from pathlib import Path
+from .StudentClass import Student
 
 # Referencing the Student_System directory through this script's current position
 mainDirectory = Path(__file__).resolve().parent.parent
@@ -21,8 +22,12 @@ def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user
     except Exception as e:
         raise(e) # Automatically raises it to the main script
 
-def writeToFile(targetGrade:str): # Doesn't require a check since the user will only have a choice between the 2
-    print("TODO!")
+def writeToFile(targetGrade:str,targetToWrite:Student): # Doesn't require a check since the user will only have a choice between the 2
+    targetPath = filePaths.get(targetGrade)
+    studentFile = open(targetPath,"a")
+    
+    studentFile.write(f"\n{targetToWrite.serializeStudent()}")
+    studentFile.close()
 
 # Fetches from every student tgrade, through the usage of 'fetchDataFromFile'
 def fetchAllData():
