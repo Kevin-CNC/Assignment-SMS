@@ -116,10 +116,10 @@ def addNewStudent():
                     print("Adding postgraduate student details: ")
                     
                     while True: # Student name choice
-                        global studentName
-                        studentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
+                        global postStudentName
+                        postStudentName = str(input("Enter your student's full name (Name Second_Name Surname): "))
                         
-                        if studentName.find("-") == -1:
+                        if postStudentName.find("-") == -1:
                             break
                         else:
                             print("Invalid name, contains an illegal character.")
@@ -178,12 +178,12 @@ def addNewStudent():
                             break
                         
                     
-                    print(f"Here are the finalised details:\nYour student is an: Postgraduate;\nYour student's course is: {Courses["Postgraduate"][postgradCourseId]};\nYour student completed the undergraduate course: {completedCourse};\nYour student completed their undergraduate course at the following institution: {prevUniName};\n\nEnter 1 to confirm this student's details, press 2 to retry the process, anything else to directly go back to main menu.")
+                    print(f"Here are the finalised details:\nYour student is an: Postgraduate;\nYour student's name is: {postStudentName};\nYour student's course is: {Courses["Postgraduate"][postgradCourseId]};\nYour student completed the undergraduate course: {completedCourse};\nYour student completed their undergraduate course at the following institution: {prevUniName};\n\nEnter 1 to confirm this student's details, press 2 to retry the process, anything else to directly go back to main menu.")
                 
                     userChoice = getNumeralInput("","")
                     if userChoice == 1: # Confirmation; can add to database
-                        confirmedStudent = PostGrad(studentName,5,completedCourse,prevUniName,courseId)
-                        writeToFile("Postgraduate",confirmedStudent)
+                        confirmedStudent = PostGrad(postStudentName,5,completedCourse,prevUniName,postgradCourseId)
+                        writeToFile("Postgraduates",confirmedStudent)
                         
                         print("Student added, going back to main menu...")
                         printMainMenu()
@@ -201,6 +201,23 @@ def addNewStudent():
         print(e)
 
 
+def updateStudentDetails():
+    print("How do you want to find the student?\n1- By ID\n2- By Full name")
+    searchMode = getNumeralInput("","Invalid choice, returning to menu.")
+    
+    if searchMode == 1 or searchMode == 2:
+        dataTarget = str() # used for message prompt
+        if searchMode == 1:
+            dataTarget = "ID"
+        else:
+            dataTarget = "Full name"
+        print(f"Mode chosen: {dataTarget}")
+        
+        while True:
+            key = str(input(f"Enter the {dataTarget} of the student you'd like to update: "))
+            findStudentAlgorithm(searchMode,key)
+    
+
 ## MAIN PROGRAM HERE ##
 printMainMenu()
 InProgram = True
@@ -212,6 +229,8 @@ while InProgram:
         case 1:
             addNewStudent()
             break
+        case 2:
+            updateStudentDetails()
         case 4:
             print(fetchAllData())
         case 5:

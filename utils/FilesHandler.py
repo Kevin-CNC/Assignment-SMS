@@ -2,7 +2,8 @@ from pathlib import Path
 from .StudentClass import Student
 from .PostgraduateClass import Postgraduate
 from .UndergradClass import Undergraduate
-import threading as T
+from .returnableThreadClass import returningThread
+import math
 
 # Referencing the Student_System directory through this script's current position
 mainDirectory = Path(__file__).resolve().parent.parent
@@ -18,14 +19,37 @@ def __getRawFromAll__():
     undergraduatePath = filePaths.get("Undergraduates")
     postgraduatePath = filePaths.get("Postgraduates")
     
-    # TODO
+    underGFile = open(undergraduatePath,"r+")
+    for line in underGFile:
+        # 0: Type (undergraduate), 1: Year of study, 2: Unique Id, 3: Course ID, 4: Full name
+        fields = line.split("-") # turns current string into a list with "-" as the separator
+        fields[4] = fields[4].strip()
+        dataList.append(fields)
+    underGFile.close()
+    
+        
+    postGFile = open(postgraduatePath,"r+")
+    for line in postGFile:
+        # 0: Type (postgrad), 1: Year of study, 2: Unique Id, 3: Already-finished course, 4: Old university, 5: Current Postgrad course, 6: name
+        fields = line.split("-") # turns current string into a list with "-" as the separator
+        fields[6] = fields[6].strip()
+        dataList.append(fields)
+    postGFile.close()
+        
+    return dataList
+    
+
+def _findInFrameById_(dataFrame:list,id:str): # all data in text file will be text-based; do not expect to find actual integers
+    for item in dataFrame: # remember, 'item' will be a list object (nested lists)
+        print(item)
+        studentId = item[2]
+        if studentId == id:
+            return item
+    
+    return None
         
     
     
-    
-    
-    
-
 def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user will only have a choice between the 2
     try:
         targetPath = filePaths.get(targetGrade)
@@ -54,9 +78,70 @@ def fetchAllData():
         raise(e)
     
     
-def findStudentAlgorithm(searchMode:int): # user will be able to choose between 2 modes (Name & UniqueID)
+def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to choose between 2 modes (Name & UniqueID)
     # main idea behind algorithms:
     # accumulate all in 1 list
-    # in both cases, split list into closest number of chunks possible and create different threads for each chunk
-    # TODO
-    print("mns")
+    # in both cases, split list into chunks large enough that would produce 5 or less child processes
+    all_students = list()
+    
+    all_students = __getRawFromAll__()
+
+    # Start at 1; conditions check if the amount of child processes produced will not exceed 5.
+    foundMax = 1
+    while True:
+        if len(all_students)%foundMax == 0 and len(all_students)/foundMax <= 5:
+            break
+        else:
+            foundMax += 1
+            
+    last_anchor_point = 0
+    
+    resultsCapsules=[None] * 5 # empty result cells for the threads to return the found student
+
+    if foundMax == len(all_students):
+        for i in range(4):
+            d_frame = list()
+            
+            frameCeiling = math.floor(len(all_students)/5) # rounds down numbers so elements are split equally in the first 4 frames
+            
+            for dataIndex in range(last_anchor_point,frameCeiling*i+1):
+                d_frame.append( all_students[dataIndex] )
+                
+            last_anchor_point = frameCeiling*i+1
+            
+            if searchMode == 1: # Even if ID, it will be a string on the text file.
+                current_T = returningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
+                current_T.start()
+                resultsCapsules[i] = current_T.getResult() # waits until the thread ends and returns result into its' respective capsule
+                
+        
+        final_DFrame = list()
+        # put remaining data in the last frame
+        for dataIndex in range(last_anchor_point,len(all_students)):
+                final_DFrame.append( all_students[dataIndex] )
+        
+        if searchMode == 1: # Even if ID, it will be a string on the text file.
+            current_T = returningThread(target=_findInFrameById_,args=([final_DFrame,searchKey]))
+            current_T.start()
+            resultsCapsules[4] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+                
+                
+    else:
+        for i in range(len(all_students)/foundMax):
+            dFrame = list()
+            
+            for x in range(last_anchor_point,foundMax*i):
+                if x > len(all_students):
+                    break
+                
+                dFrame.append( all_students[x] )
+                
+            last_anchor_point = (foundMax*i)
+            
+            if searchMode == 1: # Even if ID, it will be a string on the text file.
+                current_T = returningThread(target=_findInFrameById_,args=([dFrame,searchKey]))
+                current_T.start()
+                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+    
+    for capsule in resultsCapsules:
+        print(capsule)
