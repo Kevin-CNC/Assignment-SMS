@@ -215,7 +215,119 @@ def updateStudentDetails():
         
         while True:
             key = str(input(f"Enter the {dataTarget} of the student you'd like to update: "))
-            findStudentAlgorithm(searchMode,key)
+            searchResultPool = findStudentAlgorithm(searchMode,key) 
+            
+            # Process of analysing the results given
+            foundTargets = list()
+            for result in searchResultPool:
+                if not(result == None):
+                    foundTargets.append(result)
+                    
+            
+            if len(foundTargets) == 0:
+                print("No students found; enter 1 to retry, anything else to exit.")
+                choice = getNumeralInput("","Invalid input; exiting mode.")
+                if not( choice == 1 ):
+                    break
+                
+            elif len(foundTargets) == 1: # 1 student found
+                print(f"Student found: {foundTargets[0]}")
+                print("Press 1 to confirm, press 2 to retry, anything else to exit the mode.")
+                
+                choice = getNumeralInput("","Invalid input; exiting mode.")
+                if not( choice == 1 or choice == 2 ):
+                    break
+                elif choice == 2: # Retries the whole process
+                    continue
+                elif choice == 1:
+                    studentToModify = foundTargets[0]
+                    modified = False
+                    if studentToModify[0] == "Undergraduate":
+                        print("""Please choose what to modify:\n
+                              1- Student's Name\n
+                              2- Student's current course\n
+                              3- Student's study year\n
+                              4- Exit""")
+                        while True: # Entered student modification mode
+                            optionChoice = getNumeralInput("","Invalid option, try again...")
+                            
+                            if optionChoice == 1: # Name choice
+                                while True: # choice loop
+                                    newName = str(input("Enter your student's new name: "))
+                                    
+                                    if newName.find("-") == -1: # not an illegal name
+                                        print(f"Your student's new chosen name is: {newName}; Do you wish to apply it to your student? (old name:{studentToModify[4]})")
+                                        confirmation = getNumeralInput("1 for Yes; anything else for no\n","Invalid command; abort change of name.")
+                                        
+                                        if not( confirmation == 1):
+                                            continue # Skip current iteration; go back to name choice
+                                        else:
+                                            studentToModify[4] = newName # Apply change and break from current choice-loop
+                                            modified = True
+                                            break
+                                        
+                            elif optionChoice == 2: # Course choice                                        
+                                while True:
+                                    printAllUndergradCourses()
+                                    
+                                    newCourseID = str(input("Enter course ID: "))
+                                    if Courses["Undergraduate"].get(newCourseID) == None:
+                                        print("Invalid course, try again.")
+                                        continue
+                                    else:
+                                        print(f"Your student's new course is: {newCourseID} - {Courses["Undergraduate"].get(newCourseID)}; Do you wish to apply it to your student? (old course:{studentToModify[3] - {Courses["Undergraduate"].get(studentToModify[3])}})")
+                                        confirmation = getNumeralInput("1 for Yes; anything else for no\n","Invalid command; abort change of course.")
+                                        if not( confirmation == 1):
+                                            continue # Skip current iteration; go back to name choice
+                                        else:
+                                            studentToModify[3] = newCourseID # Apply change and break from current choice-loop
+                                            modified = True
+                                            break
+                                        
+                                        
+                            elif optionChoice == 3: # Year choice
+                                while True: # choice loop
+                                    newYear = getNumeralInput("Enter your student's new year (1 - 3): ","Not a valid number...")
+                                    
+                                    if 0 < newYear < 4: # not an illegal name
+                                        print(f"Your student's new year is: {newYear}; Do you wish to apply it to your student? (old study year:{studentToModify[1]})")
+                                        confirmation = getNumeralInput("1 for Yes; anything else for no\n","Invalid command; abort change of year.")
+                                        
+                                        if not( confirmation == 1):
+                                            continue # Skip current iteration; go back to name choice
+                                        else:
+                                            studentToModify[1] = newYear # Apply change and break from current choice-loop
+                                            modified = True
+                                            break
+                            
+                            elif optionChoice == 4:
+                                break
+                                        
+                            elif optionChoice == None:
+                                continue # invalid, stay in current modification loop
+                            
+                            print(f"New student details:\n{studentToModify}")
+                            print("""Please choose what to modify:\n
+                              1- Student's Name\n
+                              2- Student's current course\n
+                              3- Student's study year\n
+                              4- Exit""")
+                            
+                            
+                        if modified: # modifications actually applied
+                            replaceUndergradInFile(studentToModify)
+                            break
+                            
+                            
+                
+            
+                
+        print("Exiting update student mode...")
+        printMainMenu()
+                
+            
+            
+            
     
 
 ## MAIN PROGRAM HERE ##

@@ -2,7 +2,8 @@ from pathlib import Path
 from .StudentClass import Student
 from .PostgraduateClass import Postgraduate
 from .UndergradClass import Undergraduate
-from .returnableThreadClass import returningThread
+from .ReturningThreadClass import ValueReturningThread
+import threading as T
 import math
 
 # Referencing the Student_System directory through this script's current position
@@ -41,14 +42,57 @@ def __getRawFromAll__():
 
 def _findInFrameById_(dataFrame:list,id:str): # all data in text file will be text-based; do not expect to find actual integers
     for item in dataFrame: # remember, 'item' will be a list object (nested lists)
-        print(item)
         studentId = item[2]
         if studentId == id:
             return item
     
     return None
+
+def _findInFrameByName_(dataFrame:list,name:str): # all data in text file will be text-based; do not expect to find actual integers
+    for item in dataFrame: # remember, 'item' will be a list object (nested lists)
+        studentType = item[0]
         
+        if studentType == "Postgraduate":    
+            studentName = item[6]
+            if studentName == name:
+                return item 
+        elif studentType == "Undergraduate":    
+            studentName = item[4]
+            if studentName == name:
+                return item
     
+    return None
+    
+def replaceUndergradInFile(undergradInfo:list): # gathers all data from undergrad file, replaces affected student, rewrites it back into the file
+    undergraduatePath = filePaths.get("Undergraduates")
+    underGFile = open(undergraduatePath,"r+")
+    
+    underGList = list()
+    
+    for line in underGFile:
+        # 0: Type (undergraduate), 1: Year of study, 2: Unique Id, 3: Course ID, 4: Full name
+        fields = line.split("-") # turns current string into a list with "-" as the separator
+        fields[4] = fields[4].strip()
+        underGList.append(fields)
+    underGFile.close()
+    
+    index = 0
+    for studentInfo in underGList:
+        if undergradInfo[3] == studentInfo[3]: # share same id; must be same student
+            underGList.pop(index)
+            underGList.insert(index,undergradInfo)
+            print("CHANGED")
+            break
+        
+        index += 1
+    
+    underGFile = open(undergraduatePath,"w+")
+    for studentInfo in underGList:
+        actualData = studentInfo[0]+"-"+str(studentInfo[1])+"-"+studentInfo[2]+"-"+studentInfo[3]+"-"+studentInfo[4]+"\n"
+        underGFile.write(actualData)
+        
+    underGFile.close()
+
     
 def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user will only have a choice between the 2
     try:
@@ -109,39 +153,52 @@ def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to c
                 
             last_anchor_point = frameCeiling*i+1
             
-            if searchMode == 1: # Even if ID, it will be a string on the text file.
-                current_T = returningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
+            if searchMode == 1: # Even if ID, it will be a string on the text file
+                current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
                 current_T.start()
-                resultsCapsules[i] = current_T.getResult() # waits until the thread ends and returns result into its' respective capsule
-                
+                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+            elif searchMode == 2:
+                current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
+                current_T.start()
+                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+        
         
         final_DFrame = list()
         # put remaining data in the last frame
         for dataIndex in range(last_anchor_point,len(all_students)):
                 final_DFrame.append( all_students[dataIndex] )
+                
         
         if searchMode == 1: # Even if ID, it will be a string on the text file.
-            current_T = returningThread(target=_findInFrameById_,args=([final_DFrame,searchKey]))
+            current_T = ValueReturningThread(target=_findInFrameById_,args=([final_DFrame,searchKey]))
             current_T.start()
             resultsCapsules[4] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
-                
+        elif searchMode == 2:
+            current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
+            current_T.start()
+            resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
                 
     else:
-        for i in range(len(all_students)/foundMax):
-            dFrame = list()
-            
-            for x in range(last_anchor_point,foundMax*i):
+        for i in range(round(len(all_students)/foundMax)):
+            d_frame = list()
+                    
+            for x in range(last_anchor_point,foundMax*(i+1)):
                 if x > len(all_students):
                     break
                 
-                dFrame.append( all_students[x] )
+                d_frame.append( all_students[x] )
                 
-            last_anchor_point = (foundMax*i)
+            last_anchor_point = (foundMax*(i+1))
             
             if searchMode == 1: # Even if ID, it will be a string on the text file.
-                current_T = returningThread(target=_findInFrameById_,args=([dFrame,searchKey]))
+                current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
+                current_T.start()
+                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+            elif searchMode == 2:
+                current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
                 current_T.start()
                 resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
     
-    for capsule in resultsCapsules:
-        print(capsule)
+    # returns results for actual processing
+    return(resultsCapsules)
+            
