@@ -1,7 +1,5 @@
 from pathlib import Path
 from .StudentClass import Student
-from .PostgraduateClass import Postgraduate
-from .UndergradClass import Undergraduate
 from .ReturningThreadClass import ValueReturningThread
 import threading as T
 import math
@@ -47,21 +45,65 @@ def _findInFrameById_(dataFrame:list,id:str): # all data in text file will be te
             return item
     
     return None
-
-def _findInFrameByName_(dataFrame:list,name:str): # all data in text file will be text-based; do not expect to find actual integers
-    for item in dataFrame: # remember, 'item' will be a list object (nested lists)
-        studentType = item[0]
-        
-        if studentType == "Postgraduate":    
-            studentName = item[6]
-            if studentName == name:
-                return item 
-        elif studentType == "Undergraduate":    
-            studentName = item[4]
-            if studentName == name:
-                return item
     
-    return None
+    
+def deleteUserFromFiles(studentInfo:list): 
+    if studentInfo[0] == "Undergraduate":
+        
+        undergraduatePath = filePaths.get("Undergraduates")
+        underGFile = open(undergraduatePath,"r+")
+        
+        underGList = list()
+        
+        for line in underGFile:
+            # 0: Type (undergraduate), 1: Year of study, 2: Unique Id, 3: Course ID, 4: Full name
+            fields = line.split("-") # turns current string into a list with "-" as the separator
+            fields[4] = fields[4].strip()
+            underGList.append(fields)
+        underGFile.close()
+        
+        index = 0
+        for studentInfo in underGList:
+            if studentInfo[3] == studentInfo[3]: # share same id; must be same student
+                underGList.pop(index)
+                break
+            index += 1
+        
+        underGFile = open(undergraduatePath,"w+")
+        for studentInfo in underGList:
+            actualData = studentInfo[0]+"-"+str(studentInfo[1])+"-"+studentInfo[2]+"-"+studentInfo[3]+"-"+studentInfo[4]+"\n"
+            underGFile.write(actualData)
+        underGFile.close()
+        
+    elif studentInfo[0] == "Postgraduate":
+        postgraduatePath = filePaths.get("Postgraduates")
+        postGFile = open(postgraduatePath,"r+")
+        
+        postGList = list()
+        
+        for line in postGFile:
+            # 0: Type (postgrad), 1: Year of study, 2: Unique Id, 3: prev Course ID, 4: prev uni name, 5: current postgrad course, 6: full name
+            fields = line.split("-") # turns current string into a list with "-" as the separator
+            fields[6] = fields[6].strip()
+            postGList.append(fields)
+        postGFile.close()
+        
+        index = 0
+        for studentInfo in postGList:
+            if studentInfo[3] == studentInfo[3]: # share same id; must be same student
+                postGList.pop(index)
+                break
+            
+            index += 1
+        
+        postGFile = open(postgraduatePath,"w+")
+        for studentInfo in postGList:
+            actualData = studentInfo[0]+"-"+str(studentInfo[1])+"-"+studentInfo[2]+"-"+studentInfo[3]+"-"+studentInfo[4]+"-"+studentInfo[5]+"-"+studentInfo[6]+"\n"
+            postGFile.write(actualData)
+            
+        postGFile.close()
+        
+        
     
 def replaceUndergradInFile(undergradInfo:list): # gathers all data from undergrad file, replaces affected student, rewrites it back into the file
     undergraduatePath = filePaths.get("Undergraduates")
@@ -81,7 +123,6 @@ def replaceUndergradInFile(undergradInfo:list): # gathers all data from undergra
         if undergradInfo[3] == studentInfo[3]: # share same id; must be same student
             underGList.pop(index)
             underGList.insert(index,undergradInfo)
-            print("CHANGED")
             break
         
         index += 1
@@ -94,6 +135,37 @@ def replaceUndergradInFile(undergradInfo:list): # gathers all data from undergra
     underGFile.close()
 
     
+def replacePostgradInFile(postgradInfo:list): # gathers all data from undergrad file, replaces affected student, rewrites it back into the file
+    postgraduatePath = filePaths.get("Postgraduates")
+    postGFile = open(postgraduatePath,"r+")
+    
+    postGList = list()
+    
+    for line in postGFile:
+        # 0: Type (postgrad), 1: Year of study, 2: Unique Id, 3: prev Course ID, 4: prev uni name, 5: current postgrad course, 6: full name
+        fields = line.split("-") # turns current string into a list with "-" as the separator
+        fields[6] = fields[6].strip()
+        postGList.append(fields)
+    postGFile.close()
+    
+    index = 0
+    for studentInfo in postGList:
+        if postgradInfo[3] == studentInfo[3]: # share same id; must be same student
+            postGList.pop(index)
+            postGList.insert(index,postgradInfo)
+            break
+        
+        index += 1
+    
+    postGFile = open(postgraduatePath,"w+")
+    for studentInfo in postGList:
+        actualData = studentInfo[0]+"-"+str(studentInfo[1])+"-"+studentInfo[2]+"-"+studentInfo[3]+"-"+studentInfo[4]+"-"+studentInfo[5]+"-"+studentInfo[6]+"\n"
+        postGFile.write(actualData)
+        
+    postGFile.close()
+    
+    
+    
 def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user will only have a choice between the 2
     try:
         targetPath = filePaths.get(targetGrade)
@@ -105,6 +177,8 @@ def fetchDataFromFile(targetGrade:str): # Doesn't require a check since the user
         return content
     except Exception as e:
         raise(e) # Automatically raises it to the main script
+
+
 
 def writeToFile(targetGrade:str,targetToWrite:Student): # Doesn't require a check since the user will only have a choice between the 2
     targetPath = filePaths.get(targetGrade)
@@ -122,7 +196,7 @@ def fetchAllData():
         raise(e)
     
     
-def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to choose between 2 modes (Name & UniqueID)
+def findStudentAlgorithm(searchKey:str): # user will be able to choose between 2 modes (Name & UniqueID)
     # main idea behind algorithms:
     # accumulate all in 1 list
     # in both cases, split list into chunks large enough that would produce 5 or less child processes
@@ -153,14 +227,9 @@ def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to c
                 
             last_anchor_point = frameCeiling*i+1
             
-            if searchMode == 1: # Even if ID, it will be a string on the text file
-                current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
-                current_T.start()
-                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
-            elif searchMode == 2:
-                current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
-                current_T.start()
-                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+            current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
+            current_T.start()
+            resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
         
         
         final_DFrame = list()
@@ -169,14 +238,9 @@ def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to c
                 final_DFrame.append( all_students[dataIndex] )
                 
         
-        if searchMode == 1: # Even if ID, it will be a string on the text file.
-            current_T = ValueReturningThread(target=_findInFrameById_,args=([final_DFrame,searchKey]))
-            current_T.start()
-            resultsCapsules[4] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
-        elif searchMode == 2:
-            current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
-            current_T.start()
-            resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+        current_T = ValueReturningThread(target=_findInFrameById_,args=([final_DFrame,searchKey]))
+        current_T.start()
+        resultsCapsules[4] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
                 
     else:
         for i in range(round(len(all_students)/foundMax)):
@@ -190,14 +254,9 @@ def findStudentAlgorithm(searchMode:int,searchKey:str): # user will be able to c
                 
             last_anchor_point = (foundMax*(i+1))
             
-            if searchMode == 1: # Even if ID, it will be a string on the text file.
-                current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
-                current_T.start()
-                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
-            elif searchMode == 2:
-                current_T = ValueReturningThread(target=_findInFrameByName_,args=([d_frame,searchKey]))
-                current_T.start()
-                resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
+            current_T = ValueReturningThread(target=_findInFrameById_,args=([d_frame,searchKey]))
+            current_T.start()
+            resultsCapsules[i] = current_T.join() # waits until the thread ends and returns result into its' respective capsule
     
     # returns results for actual processing
     return(resultsCapsules)
