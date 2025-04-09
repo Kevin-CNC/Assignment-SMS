@@ -110,6 +110,9 @@ def addNewStudent():
                     else:
                         break
                     
+                break
+                    
+                    
                     
             elif sam_Userinput == 2: # Adding postgraduate student
                 while True:
@@ -197,7 +200,6 @@ def addNewStudent():
                         break
                     
                 break
-                    
                     
     except Exception as e:
         print(e)
@@ -693,19 +695,15 @@ while InProgram:
     match userInput:
         case 1:
             addNewStudent()
-            break
         case 2:
             updateStudentDetails()
-            break
         case 3:
             deleteStudentDetails()
-            break
         case 4:
             print(fetchAllData())
-            break
         case 5:
             InProgram = False
             print("Exiting program...")
-            break
-        case _: # Default case, use this if the user input is not valid
-            continue
+        case _:
+            print("Invalid choice.")
+
