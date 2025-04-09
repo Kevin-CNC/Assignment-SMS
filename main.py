@@ -701,6 +701,7 @@ while InProgram:
             deleteStudentDetails()
         case 4:
             print(fetchAllData())
+            printMainMenu()
         case 5:
             InProgram = False
             print("Exiting program...")
