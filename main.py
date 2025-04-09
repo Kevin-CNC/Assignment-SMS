@@ -196,10 +196,11 @@ def addNewStudent():
                         printMainMenu()
                         break
                     
+                break
+                    
                     
     except Exception as e:
         print(e)
-
 
 def deleteStudentDetails():
     
@@ -670,7 +671,6 @@ def updateStudentDetails():
                             
                         if modified: # modifications actually applied
                             replacePostgradInFile(studentToModify)
-
                         break    
                 
             
