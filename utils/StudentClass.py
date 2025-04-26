@@ -36,3 +36,5 @@ class Student():
     def serializeStudent(self):
         # create a string-equivalent of the class, with '-' as its' separators
         serializedClass = f"""-{self._studyYear_}-{self._uniqueId_}-{self.__name__}"""
+        
+        return serializedClass
