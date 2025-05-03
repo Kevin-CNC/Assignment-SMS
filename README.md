@@ -5,3 +5,7 @@ Develop a system which will be able to do the following:
 * Delete a student from their respective database
 * Search for a specific student using optimized custom-search algorithms
 * Be able to list & perform operations to the student database (e.g: sorting alphabetically by ID, show students in specific courses)
+
+# How to run:
+Install 'pathlib' if not already in your libraries.
+Run the script by using: "python main.py"
