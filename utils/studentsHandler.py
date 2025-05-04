@@ -28,7 +28,7 @@ def deleteStudentDetails():
             print(f"Student found: {foundTargets[0]}")
             print("Press 1 to confirm, press 2 to retry, anything else to exit the mode.\nUSE WITH CAUTION; THE STUDENT'S DATA WILL BE DELETED FOREVER!")
             
-            choice = getNumeralInput("","Invalid input; exiting mode.")
+            choice = getNumeralInput("","")
             if not( choice == 1 or choice == 2 ):
                 break
             elif choice == 2: # Retries the whole process

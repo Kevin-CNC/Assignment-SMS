@@ -20,19 +20,33 @@ def __getRawFromAll__():
     
     underGFile = open(undergraduatePath,"r+")
     for line in underGFile:
+        if line == "" : # If there are empty spaces, simply skip the iteration
+            continue
+        
         # 0: Type (undergraduate), 1: Year of study, 2: Unique Id, 3: Course ID, 4: Full name
-        fields = line.split("-") # turns current string into a list with "-" as the separator
-        fields[4] = fields[4].strip()
-        dataList.append(fields)
+        try:
+            fields = line.split("-") # turns current string into a list with "-" as the separator
+            fields[4] = fields[4].strip()
+            dataList.append(fields)
+        except:
+            continue
+            
     underGFile.close()
     
         
     postGFile = open(postgraduatePath,"r+")
     for line in postGFile:
+        if line == "" : # If there are empty spaces, simply skip the iteration
+            continue
+        
         # 0: Type (postgrad), 1: Year of study, 2: Unique Id, 3: Already-finished course, 4: Old university, 5: Current Postgrad course, 6: name
-        fields = line.split("-") # turns current string into a list with "-" as the separator
-        fields[6] = fields[6].strip()
-        dataList.append(fields)
+        try:
+            fields = line.split("-") # turns current string into a list with "-" as the separator
+            fields[6] = fields[6].strip()
+            dataList.append(fields)
+        except:
+            continue
+            
     postGFile.close()
         
     return dataList
